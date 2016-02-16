@@ -15,7 +15,7 @@ int valid(const char *s);
 int illegal_char_error(const char *s);
 
 int validate_row(const int *row);
-int validate_columns(int board[ROWS][COLS]);
+int validate_columns(const int board[ROWS][COLS]);
 
 int validate_boxes(int board[ROWS][COLS]);
 int validate_3x3(int board[ROWS][COLS], const int big_row, const int big_col);
@@ -25,6 +25,11 @@ int toDigit(char);
 int writeToBoard(int board[ROWS][COLS], const char *s);
 
 void print_board(const int board[ROWS][COLS], const char *message);
+
+int solve(int board[ROWS][COLS]);
+int ifexist_row(const int *row, const int element);
+int ifexist_col(const int board[ROWS][COLS], const int element);
+int ifexist_3x3(const int element, const int row_start, const int col_start);
 
 const int MAX_COUNT = 9;
 
@@ -53,6 +58,8 @@ int main()
     {
       /* solve the SuDoKu */
       print_board(board, "Board:"); 
+
+
     }
     
     printf("\n");
@@ -61,6 +68,20 @@ int main()
 }
 
 /*** FUNCTION DEFINTIIONS ***/
+/*
+ifexist(const int *row, const int element, const int current_index)
+{
+  int i;
+  for(i = 0; i < MAX_COUNT; i++)
+  {
+    if((element == row[i]) && (i != current_index))
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
+*/
 int valid(const char *s)
 {
   if((strlen(s) != 81) || (illegal_char_error(s)))
@@ -143,7 +164,7 @@ int validate_row(const int *row)
   return VALID;
 }
 
-int validate_columns(int board[ROWS][COLS]) 
+int validate_columns(const int board[ROWS][COLS]) 
 {
   const int MAX_COUNT = 9;
   int i, j, k;
@@ -209,7 +230,7 @@ int validate_3x3(int board[ROWS][COLS], const int big_row, const int big_col)
 
   for(m = row_start; m < (row_start + 3); m++)
   {
-    for(n = col_start; j < (col_start + 3); n++)
+    for(n = col_start; n < (col_start + 3); n++)
     {
       if(board[m][n] == 0) continue;
 
