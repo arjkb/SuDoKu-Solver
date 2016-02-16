@@ -15,7 +15,7 @@ int valid(const char *s);
 int illegal_char_error(const char *s);
 
 int validate_row(const int *row);
-int validate_columns(const int board[ROWS][COLS]);
+int validate_columns(int board[ROWS][COLS]);
 
 int validate_boxes(int board[ROWS][COLS]);
 int validate_3x3(int board[ROWS][COLS], const int big_row, const int big_col);
@@ -24,21 +24,26 @@ int toDigit(char);
 
 int writeToBoard(int board[ROWS][COLS], const char *s);
 
-void print_board(const int board[ROWS][COLS], const char *message);
+void print_board(int board[ROWS][COLS], const char *message);
 
 int solve(int board[ROWS][COLS]);
-int ifexist_row(const int *row, const int element);
+int initial_sweep(int board[ROWS][COLS]);
+int exist_row(const int *row, const int element, const int current_index);
+
+/*
 int ifexist_col(const int board[ROWS][COLS], const int element);
 int ifexist_3x3(const int element, const int row_start, const int col_start);
+*/
 
 const int MAX_COUNT = 9;
 
 int main()
 {
   int board[ROWS][COLS];
+  int solvecount =  0;
 
   char c;
-  char *inp_line;
+  char inp_line[82];
 
   while((c = getchar()) != EOF)
   {
@@ -59,6 +64,12 @@ int main()
       /* solve the SuDoKu */
       print_board(board, "Board:"); 
 
+       solvecount = solve(board);
+
+       if( solvecount > 0 ) 
+       {
+         print_board(board, "Solved: ");
+       }
 
     }
     
@@ -68,20 +79,76 @@ int main()
 }
 
 /*** FUNCTION DEFINTIIONS ***/
-/*
-ifexist(const int *row, const int element, const int current_index)
+
+int solve(int board[ROWS][COLS])
 {
+  return initial_sweep(board);
+}
+
+int initial_sweep(int board[ROWS][COLS])
+{
+  /* Checks for any obvious squares */
+  int possibility_count = 0; /* keeps track of no of diff 
+                              possible values in a square */
+  int val, candidate;
+  int changed;
+  int tot_change = 0;
+
+  int i, j;
+
+  do  
+  {
+    changed = 0;
+
+    for(i = 0; i < ROWS; i++)  
+    {
+      for(j = 0; j < COLS; j++)
+      {
+        if(board[i][j] == 0)
+        {
+          /* Attempt filling only if the board is empty */
+        
+          possibility_count = 0;
+
+          for(val = 1; val <= MAX_COUNT; val++)
+          {
+
+            if(!exist_row(board[i], val, j))
+            {
+              candidate = val;
+              possibility_count++;
+            }
+          } 
+
+          if(possibility_count == 1)
+          {
+            printf(" FILLING IN %d at (%d, %d)", candidate, i, j);
+            board[i][j] = candidate;
+            changed = 1;
+            tot_change++;
+          }
+        }
+      } 
+    }
+  } while( changed );
+  return tot_change;
+}
+
+int exist_row(const int *row, const int element, const int current_index)
+{
+  /* Returns true if element exists in the row
+   */
   int i;
   for(i = 0; i < MAX_COUNT; i++)
   {
     if((element == row[i]) && (i != current_index))
     {
-      return 0;
+      return 1;
     }
   }
-  return 1;
+  return 0;
 }
-*/
+
 int valid(const char *s)
 {
   if((strlen(s) != 81) || (illegal_char_error(s)))
@@ -164,7 +231,7 @@ int validate_row(const int *row)
   return VALID;
 }
 
-int validate_columns(const int board[ROWS][COLS]) 
+int validate_columns(int board[ROWS][COLS]) 
 {
   const int MAX_COUNT = 9;
   int i, j, k;
@@ -251,7 +318,7 @@ int validate_3x3(int board[ROWS][COLS], const int big_row, const int big_col)
   return VALID;
 }
 
-void print_board(const int board[ROWS][COLS], const char *message)  {
+void print_board(int board[ROWS][COLS], const char *message)  {
   int i, j;
 
   printf(" >>> %s\n", message);
