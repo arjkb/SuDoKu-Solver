@@ -71,7 +71,6 @@ int main()
        {
          print_board(board, "Solved: ");
        }
-
     }
     
     printf("\n");
@@ -95,9 +94,8 @@ int initial_sweep(int board[ROWS][COLS])
    */
   int possibility_count_r = 0;
   int possibility_count_c = 0;
-  int possibility_count_3 = 0;
 
-  int val, candidate_r, candidate_c, candidate_3;
+  int val, candidate_r, candidate_c;
   int changed;
   int tot_change = 0;
 
@@ -116,12 +114,13 @@ int initial_sweep(int board[ROWS][COLS])
           /* Attempt filling only if the board is empty */
         
           possibility_count_r = 0;
+          possibility_count_c = 0;
 
           for(val = 1; val <= MAX_COUNT; val++)
           {
 
             /*  Tries to see if a val is possible in a square (i, j)
-             *  (by checking if the value exists anywhere else in that same row).
+             *  (by checking if the value exists anywhere else in that same row, col).
              *
              *  If the val is the only possible candidate for a square, 
              *  it is assigned to that square.
@@ -131,15 +130,30 @@ int initial_sweep(int board[ROWS][COLS])
               candidate_r = val;
               possibility_count_r++;
             }
+
+            if(!exist_col(board, val, i, j))
+            {
+              candidate_c = val;
+              possibility_count_c++;
+            }
           } 
 
           if(possibility_count_r == 1)
           {
             printf(" R FILLING IN %d at (%d, %d)", candidate_r, i, j);
             board[i][j] = candidate_r;
-            changed = 1;
+            changed++;
             tot_change++;
           }
+
+          if(possibility_count_c == 1)
+          {
+            printf(" C FILLING IN %d at (%d, %d)", candidate_c, i, j);
+            board[i][j] = candidate_c;
+            changed++;
+            tot_change++;
+          }
+      
         }
       } 
     }
