@@ -29,6 +29,7 @@ void print_board(int board[ROWS][COLS], const char *message);
 int solve(int board[ROWS][COLS]);
 int initial_sweep(int board[ROWS][COLS]);
 int exist_row(const int *row, const int element, const int current_index);
+int exist_col(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col);
 
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
@@ -88,9 +89,15 @@ int solve(int board[ROWS][COLS])
 int initial_sweep(int board[ROWS][COLS])
 {
   /* Checks for any obvious squares */
-  int possibility_count = 0; /* keeps track of no of diff 
-                              possible values in a square */
-  int val, candidate;
+  
+  /* Possibility counts keep track of number of
+   * different possible values in a square
+   */
+  int possibility_count_r = 0;
+  int possibility_count_c = 0;
+  int possibility_count_3 = 0;
+
+  int val, candidate_r, candidate_c, candidate_3;
   int changed;
   int tot_change = 0;
 
@@ -108,12 +115,12 @@ int initial_sweep(int board[ROWS][COLS])
         {
           /* Attempt filling only if the board is empty */
         
-          possibility_count = 0;
+          possibility_count_r = 0;
 
           for(val = 1; val <= MAX_COUNT; val++)
           {
 
-            /*  Tries to see if a val is possible in a square
+            /*  Tries to see if a val is possible in a square (i, j)
              *  (by checking if the value exists anywhere else in that same row).
              *
              *  If the val is the only possible candidate for a square, 
@@ -121,15 +128,15 @@ int initial_sweep(int board[ROWS][COLS])
              */
             if(!exist_row(board[i], val, j))
             {
-              candidate = val;
-              possibility_count++;
+              candidate_r = val;
+              possibility_count_r++;
             }
           } 
 
-          if(possibility_count == 1)
+          if(possibility_count_r == 1)
           {
-            printf(" FILLING IN %d at (%d, %d)", candidate, i, j);
-            board[i][j] = candidate;
+            printf(" R FILLING IN %d at (%d, %d)", candidate_r, i, j);
+            board[i][j] = candidate_r;
             changed = 1;
             tot_change++;
           }
@@ -148,6 +155,21 @@ int exist_row(const int *row, const int element, const int current_index)
   for(i = 0; i < MAX_COUNT; i++)
   {
     if((element == row[i]) && (i != current_index))
+    {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int exist_col(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col)
+{
+  /* Returns true of element exists in the current column */
+
+  int i;
+  for(i = 0; i < MAX_COUNT; i++)  
+  {
+    if((element == board[i][curr_col]) && (i != curr_row))
     {
       return 1;
     }
