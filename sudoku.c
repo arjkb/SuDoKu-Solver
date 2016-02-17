@@ -113,6 +113,12 @@ int initial_sweep(int board[ROWS][COLS])
           for(val = 1; val <= MAX_COUNT; val++)
           {
 
+            /*  Tries to see if a val is possible in a square
+             *  (by checking if the value exists anywhere else in that same row).
+             *
+             *  If the val is the only possible candidate for a square, 
+             *  it is assigned to that square.
+             */
             if(!exist_row(board[i], val, j))
             {
               candidate = val;
