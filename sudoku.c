@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<ctype.h>
+#include<math.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -30,6 +31,12 @@ int solve(int board[ROWS][COLS]);
 int initial_sweep(int board[ROWS][COLS]);
 int exist_row(const int *row, const int element, const int current_index);
 int exist_col(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col);
+
+void setb(int *, int);
+void clearb(int *, int);
+int checkBit(int, int);
+int getBitval(int);
+
 
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
@@ -385,4 +392,34 @@ void print_board(int board[ROWS][COLS], const char *message)  {
 int toDigit(char c)
 {
   return c - '0';
+}
+
+/** Bit manipulation operations **/
+int getBitval(int n)  {
+  /* helper function to return a bit pattern that 
+   * returns an int with the nth bit turned on
+   */
+
+  return (int) pow(2, n);
+}
+
+int checkBit(int n, int b)  {
+  /* returns true if bth bit in n is set
+   *  0 otherwise
+   */
+  
+  return (n & (getBitval(b)))?1:0;
+}
+
+
+void setb(int *n, int b)  {
+  /* sets the bth bit of n */
+
+  *n |= getBitval(b);
+}
+
+void clearb(int *n, int b)  {
+  /* clears bth bit of n */
+
+  *n &= ~(getBitval(b));
 }
