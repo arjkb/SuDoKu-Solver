@@ -32,11 +32,13 @@ int initial_sweep(int board[ROWS][COLS]);
 int exist_row(const int *row, const int element, const int current_index);
 int exist_col(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col);
 
-void setb(int *, int);
-void clearb(int *, int);
-int checkBit(int, int);
+void setbit(int *, int);
+void clearbit(int *, int);
+int checkbit(int, int);
 int getBitval(int);
 
+void initializeCandidates();
+void determineCandidates();
 
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
@@ -44,6 +46,9 @@ int ifexist_3x3(const int element, const int row_start, const int col_start);
 */
 
 const int MAX_COUNT = 9;
+
+/* Keeps track of candidates for a square (as bit patterns) */
+int candidates[ROWS][COLS];
 
 int main()
 {
@@ -71,13 +76,12 @@ int main()
     {
       /* solve the SuDoKu */
       print_board(board, "Board:"); 
-
-       solvecount = solve(board);
-
-       if( solvecount > 0 ) 
-       {
-         print_board(board, "Solved: ");
-       }
+      solvecount = solve(board);
+      
+      if( solvecount > 0 ) 
+      {
+        print_board(board, "Solved: ");
+      }
     }
     
     printf("\n");
@@ -86,6 +90,67 @@ int main()
 }
 
 /*** FUNCTION DEFINTIIONS ***/
+
+void intializeCandidates()  
+{
+  const int SET_1_9 = 1022;
+  int i, j;
+
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      candidates[i][j] = SET_1_9;
+    }
+  }
+}
+
+void determineCandidates(int board[ROWS][COLS]) 
+{
+  int i, j, val;
+
+  /* Go row-wise */
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; i < COLS; j++)
+    {
+      if(board[i][j] == 0) continue;
+
+      for(val = 0; val < MAX_COUNT; val++)
+      {
+        if(exist_row(board[i], val, j))
+        {
+          /* clear the bits for impossible candidates 
+           * if value exists in the same row 
+           */
+          clearbit(&candidates[i][j], val);
+        }
+      }
+    }
+  }
+
+
+  /* Go column-wise */
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; i < COLS; j++)
+    {
+      if(board[i][j] == 0) continue;
+
+      for(val = 0; val < MAX_COUNT; val++)
+      {
+        if(exist_col(board, val, i, j))
+        {
+          /* clear the bits for impossible candidates if value exists in the same column 
+           */
+          clearbit(&candidates[i][j], val);
+        }
+      }
+    }
+  }
+
+}
+
 
 int solve(int board[ROWS][COLS])
 {
@@ -403,7 +468,7 @@ int getBitval(int n)  {
   return (int) pow(2, n);
 }
 
-int checkBit(int n, int b)  {
+int checkbit(int n, int b)  {
   /* returns true if bth bit in n is set
    *  0 otherwise
    */
@@ -411,14 +476,13 @@ int checkBit(int n, int b)  {
   return (n & (getBitval(b)))?1:0;
 }
 
-
-void setb(int *n, int b)  {
+void setbit(int *n, int b)  {
   /* sets the bth bit of n */
 
   *n |= getBitval(b);
 }
 
-void clearb(int *n, int b)  {
+void clearbit(int *n, int b)  {
   /* clears bth bit of n */
 
   *n &= ~(getBitval(b));
