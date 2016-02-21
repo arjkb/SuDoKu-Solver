@@ -3,6 +3,8 @@
 #include<ctype.h>
 #include<math.h>
 
+#define DEBUG
+
 #define TRUE 1
 #define FALSE 0
 
@@ -31,14 +33,20 @@ int solve(int board[ROWS][COLS]);
 int initial_sweep(int board[ROWS][COLS]);
 int exist_row(const int *row, const int element, const int current_index);
 int exist_col(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col);
+int exist_3x3(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col);
 
-void setbit(int *, int);
-void clearbit(int *, int);
-int checkbit(int, int);
-int getBitval(int);
+int initial_sweep_bitwise(int board[ROWS][COLS]);
+
+void setbit(int *, const int);
+void clearbit(int *, const int);
+void clear_all_bits(int *bitpattern);
+int checkbit(int, const int);
+int getBitval(const int);
+int is_single_bit_on(const int n);
+int get_single_set_position(const int bitpattern);
 
 void initializeCandidates();
-void determineCandidates();
+void determineCandidates(int board[ROWS][COLS]);
 
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
@@ -91,10 +99,14 @@ int main()
 
 /*** FUNCTION DEFINTIIONS ***/
 
-void intializeCandidates()  
+void initializeCandidates()  
 {
-  const int SET_1_9 = 1022;
+  int SET_1_9 = 1022;
   int i, j;
+
+#ifdef debug
+  printf("\n DEBUG: inside initializecandidates()");
+#endif
 
   for(i = 0; i < ROWS; i++)
   {
@@ -103,7 +115,9 @@ void intializeCandidates()
       candidates[i][j] = SET_1_9;
     }
   }
+
 }
+
 
 void determineCandidates(int board[ROWS][COLS]) 
 {
@@ -114,9 +128,9 @@ void determineCandidates(int board[ROWS][COLS])
   {
     for(j = 0; i < COLS; j++)
     {
-      if(board[i][j] == 0) continue;
+      if(board[i][j] != 0) continue;
 
-      for(val = 0; val < MAX_COUNT; val++)
+      for(val = 1; val <= MAX_COUNT; val++)
       {
         if(exist_row(board[i], val, j))
         {
@@ -125,36 +139,77 @@ void determineCandidates(int board[ROWS][COLS])
            */
           clearbit(&candidates[i][j], val);
         }
-      }
-    }
-  }
-
-
-  /* Go column-wise */
-  for(i = 0; i < ROWS; i++)
-  {
-    for(j = 0; i < COLS; j++)
-    {
-      if(board[i][j] == 0) continue;
-
-      for(val = 0; val < MAX_COUNT; val++)
-      {
+      
         if(exist_col(board, val, i, j))
         {
           /* clear the bits for impossible candidates if value exists in the same column 
            */
           clearbit(&candidates[i][j], val);
         }
+
+        if(exist_3x3(board, val, i, j))
+        {
+          clearbit(&candidates[i][j], val);
+        }
       }
     }
   }
-
 }
 
 
 int solve(int board[ROWS][COLS])
 {
-  return initial_sweep(board);
+  /* return initial_sweep(board); */
+
+#ifdef DEBUG
+  printf("\n DEBUG: INSIDE solve()");
+#endif
+  return initial_sweep_bitwise(board);
+  
+}
+
+int initial_sweep_bitwise(int board[ROWS][COLS])
+{
+  int i, j, count, tot_change;
+
+  count = 0;
+  tot_change = 0;
+
+
+#ifdef DEBUG
+  printf("\n DEBUG: inside initial_sweep_bitwise() INTIALIZING");
+#endif
+  
+  initializeCandidates();
+
+#ifdef DEBUG
+  printf(" INITIALIZED ");
+#endif
+
+  determineCandidates(board);
+
+  do  
+  {
+    count = 0;
+    for(i = 0; i < ROWS; i++)
+    {
+      for(j = 0; j < COLS; j++)
+      {
+        if((board[i][j] == 0) && is_single_bit_on(candidates[i][j])) 
+        {
+          /* Fill the number */
+
+          board[i][j] = get_single_set_position(candidates[i][j]);
+          clear_all_bits(&candidates[i][j]);
+          count++;
+        }
+      }
+    }
+
+    tot_change += count;
+  }while(count > 0);
+
+  return tot_change;
 }
 
 int initial_sweep(int board[ROWS][COLS])
@@ -260,6 +315,48 @@ int exist_col(int board[ROWS][COLS], const int element, const int curr_row, cons
       return 1;
     }
   }
+  return 0;
+}
+
+int exist_3x3(int board[ROWS][COLS], const int element, const int row, const int col)
+{
+  /* returns true if elements exist in the current box
+   * false otherwise
+   */
+
+  int i, j;
+  int row_start;
+  int col_start;
+
+  const int BIG_ROW = (int) row/3;
+  const int BIG_COL = (int) col/3;
+
+  switch(BIG_ROW)
+  {
+    case 0: row_start = 0; break;
+    case 1: row_start = 3; break;
+    case 2: row_start = 6; break;
+    default: return INVALID;
+  }
+
+  switch(BIG_COL)
+  {
+    case 0: col_start = 0; break;
+    case 1: col_start = 3; break;
+    case 2: col_start = 6; break;
+    default: return INVALID;
+  }
+
+  for(i = row_start; i < (row_start + 3); i++)
+  {
+    for(j = col_start; j < (col_start + 3); j++)
+    {
+      if((element == board[i][j]) && (i != row) && (j != col))  {
+        return 1;
+      }
+    }
+  }
+
   return 0;
 }
 
@@ -458,17 +555,19 @@ int toDigit(char c)
 {
   return c - '0';
 }
-
+ 
 /** Bit manipulation operations **/
-int getBitval(int n)  {
+int getBitval(const int n)  
+{
   /* helper function to return a bit pattern that 
    * returns an int with the nth bit turned on
    */
 
-  return (int) pow(2, n);
+  return (int) pow(2, (int)n);
 }
 
-int checkbit(int n, int b)  {
+int checkbit(int n, const int b)  
+{
   /* returns true if bth bit in n is set
    *  0 otherwise
    */
@@ -476,14 +575,49 @@ int checkbit(int n, int b)  {
   return (n & (getBitval(b)))?1:0;
 }
 
-void setbit(int *n, int b)  {
+void setbit(int *n, const int b)  
+{
   /* sets the bth bit of n */
 
   *n |= getBitval(b);
 }
 
-void clearbit(int *n, int b)  {
+void clearbit(int *n, const int b)  
+{
   /* clears bth bit of n */
 
   *n &= ~(getBitval(b));
+
+}
+
+void clear_all_bits(int *bitpattern)
+{
+  *bitpattern &= 0;
+}
+
+int is_single_bit_on(const int x) 
+{
+  return ((x & (x-1)) == 0)?1:0;
+}
+
+int get_single_set_position(const int bitpattern)
+{
+  switch(bitpattern)
+  {
+    case 1: return 0;
+
+    case 2: return 1;
+    case 4: return 2;
+    case 8: return 3;
+
+    case 16: return 4;
+    case 32: return 5;
+    case 64: return 6;
+
+    case 128: return 7;
+    case 256: return 8;
+    case 512: return 9;
+    
+    default: return -1;
+  }
 }
