@@ -1,0 +1,47 @@
+// Algorithm for backtracking through the SuDoKu board
+
+create duplicate(board) into B
+create duplicate(candidate) into candy
+
+for r: 0 - 9  {
+  for c: 0 - 9  {
+
+    old_c = 0;
+
+    c = get_next_candidate(candy[i][j], old_c);
+
+    if( c != -1 ) {
+
+      B[i][j] = c;
+
+      push(i, j, c);
+
+      if(board_is_valid)  {
+        continue;
+      }
+
+      else  {
+        old_c = pop_n();
+      }
+    }
+
+    else if ( c == -1 ) {
+      // backtrack.
+
+      // pop j
+      // increment j to next free column
+      // continue
+    }
+
+
+  }
+}
+
+
+int get_next_candidate(candidates, old_c) {
+  returns next eligible candidate that's greater than old_c
+
+  returns -1 if no eligible candidate
+
+
+}

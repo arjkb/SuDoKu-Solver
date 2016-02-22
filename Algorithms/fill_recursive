@@ -1,0 +1,41 @@
+int fill(B, C, i, j)  {
+  duplicate B;
+  duplicate C;
+  
+  do {
+    VAL[] = possible_values;
+    m, n : indexes of next possible square;
+    int k = size of VAL
+
+    empty_count = calculate_empty_squares(B);  
+    if(empty_count == 0)  {
+      // Base case #1
+      // All squares filled in.
+
+      return SUCCESS;
+    }
+
+    else if(VAL is empty) {
+      // Base case #2
+      // cannot proceed
+
+      return FAIL;
+    }
+
+    B[i][j] = VAL[k++];
+
+    re_calculate(C);
+
+    result = fill(B, C, m, n);
+
+    if( result == SUCCESS )  {
+      // SOLVED
+      return SUCCESS;
+    }
+
+    else if( result == FAIL )  {
+      continue;
+    }
+  } while(there are more elements in VAL);
+
+}
