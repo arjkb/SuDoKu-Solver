@@ -88,7 +88,7 @@ int main()
       
       if( solvecount > 0 ) 
       {
-        print_board(board, "Solved: ");
+        print_board(board, "Partially Filled in Board: ");
       }
     }
     
@@ -126,7 +126,7 @@ void determineCandidates(int board[ROWS][COLS])
   /* Go row-wise */
   for(i = 0; i < ROWS; i++)
   {
-    for(j = 0; i < COLS; j++)
+    for(j = 0; j < COLS; j++)
     {
       if(board[i][j] != 0) continue;
 
@@ -183,13 +183,14 @@ int initial_sweep_bitwise(int board[ROWS][COLS])
   initializeCandidates();
 
 #ifdef DEBUG
-  printf(" INITIALIZED ");
+  printf("\n INITIALIZED\n");
 #endif
 
-  determineCandidates(board);
+/*  determineCandidates(board); */
 
   do  
   {
+    determineCandidates(board);
     count = 0;
     for(i = 0; i < ROWS; i++)
     {
@@ -197,17 +198,25 @@ int initial_sweep_bitwise(int board[ROWS][COLS])
       {
         if((board[i][j] == 0) && is_single_bit_on(candidates[i][j])) 
         {
-          /* Fill the number */
+          /* Fill the number if only a single bit is turned on */
 
           board[i][j] = get_single_set_position(candidates[i][j]);
           clear_all_bits(&candidates[i][j]);
           count++;
+
+          #ifdef DEBUG
+            printf("\n FILLING NUMBER");
+          #endif
         }
       }
     }
 
     tot_change += count;
   }while(count > 0);
+
+#ifdef DEBUG
+  printf("\n Total Change: %d", tot_change);
+#endif
 
   return tot_change;
 }
