@@ -4,14 +4,15 @@
 
 #define MAX_SIZE 10
 
-int ROW_STACK[MAX_SIZE];
-int COL_STACK[MAX_SIZE];
-int NUM_STACK[MAX_SIZE];
+static int ROW_STACK[MAX_SIZE];
+static int COL_STACK[MAX_SIZE];
+static int NUM_STACK[MAX_SIZE];
 
 int top = -1;
 
 void push(const int r, const int c, const int n);
 void pop();
+void pop_fill(int *, int *, int *);
 void disp_stack();
 
 int main()  {
@@ -65,4 +66,49 @@ void push(const int r, const int c, const int n)  {
 void pop()  {
   if(top > -1)  top--;
   else          printf("\n Error: Underflow!");
+}
+
+int peek_r()  
+{
+  if(top > -1)
+  {
+    return ROW_STACK[top];
+  }
+  else
+  {
+    #ifdef DEBUG
+      printf("\n ERROR: peek_r: underflow!");
+    #endif
+    return -1;
+  }
+}
+
+int peek_c()  
+{
+  if(top > -1)
+  {
+    return COL_STACK[top];
+  }
+  else
+  {
+    #ifdef DEBUG
+      printf("\n ERROR: peek_c: underflow!");
+    #endif
+    return -1;
+  }
+}
+
+int peek_n()  
+{
+  if(top > -1)
+  {
+    return NUM_STACK[top];
+  }
+  else
+  {
+    #ifdef DEBUG
+      printf("\n ERROR: peek_n: underflow!");
+    #endif
+    return -1;
+  }
 }
