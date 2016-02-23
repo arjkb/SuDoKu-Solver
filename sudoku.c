@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include<string.h>
 #include<ctype.h>
 #include<math.h>
@@ -38,8 +39,9 @@ int exist_3x3(int board[ROWS][COLS], const int element, const int curr_row, cons
 int initial_sweep_bitwise(int board[ROWS][COLS]);
 
 int fill(int board[ROWS][COLS], int candidate[ROWS][COLS], int curr_row, int curr_col);
-void getPossibleValues(const int candidates, int *values, int *size_of_values);
+int calcEmptySquares(int B[ROWS][COLS]);
 void getNextEmptySquare(int board[ROWS][COLS], const int curr_row, const int curr_col, int *next_row, int *next_col);
+void getPossibleValues(const int candidates, int *values, int *size_of_values);
 
 void setbit(int *, const int);
 void clearbit(int *, const int);
@@ -126,7 +128,7 @@ void initializeCandidates()
 
 /** Backtracker Funtion Definitions **/
 
-void fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
+int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 {
   int i, j;
   int k = 0; 
@@ -134,10 +136,13 @@ void fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
   int m, n; /* indices of next empty square */
 
   int *val = malloc(MAX_COUNT * sizeof(int));
-  int *size = malloc(sizeof(int));
+  int size = -1;
 
-  /* Duplicating board[][] */
+  
   int B[ROWS][COLS];
+  int C[ROWS][COLS];
+
+  /* Duplicating Board */
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < COLS; j++)
@@ -148,7 +153,6 @@ void fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 
 
   /* Duplicating candy[][] */
-  int C[ROWS][COLS];
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < COLS; j++)
@@ -157,20 +161,58 @@ void fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     }
   }
   
-  getPossibleValues(C, val, size);
-  getNextEmptySquare(B, r, c, m, n);
+  getPossibleValues(C[i][j], val, &size);
 
   do
   {
-    int empty_count = calcEmptySquares(B);
+    int empty_count;
+    int result;
 
-    if( *size > 0 )
+    /* Fill in current square */
+    if((size > 0) && (k < size))
     {
       B[i][j] = val[k];
       k++;
     }
 
-  }while(val != NULL)
+    empty_count = calcEmptySquares(B);
+    if(empty_count == 0)  
+    {
+      /* Base case #1
+       * All squares filled in
+       */
+      return 1;
+    }
+
+    if( size == 0 )
+    {
+      /* Base case #2
+       * There are no more potential values to try out
+       */
+      return -1;
+    }
+
+    determineCandidates(B, C);
+    getNextEmptySquare(B, i, j, &m, &n);
+    result = fill(B, C, m, n);
+
+    if(result == 1)
+    {
+      int ii, jj;
+      /* SOLVED */
+      for(ii = 0; ii < ROWS; ii++)
+      {
+        for(jj = 0; jj < COLS; jj++)
+        {
+          board[ii][jj] = B[ii][jj];
+        }
+      }  
+      return 1;
+    }
+
+  }while(k < size);
+
+  return -1;
 }
 
 int calcEmptySquares(int B[ROWS][COLS])
@@ -185,13 +227,13 @@ int calcEmptySquares(int B[ROWS][COLS])
       if(B[i][j] == 0)  count++;
     }
   }
+  return count;
 }
 
 void getPossibleValues(int candidates, int *values, int *size)
 {
   int i = 0, b;
 
-  values = NULL;
   *size = 0;
 
   for(b = 0; b < 10; b++)
@@ -207,7 +249,7 @@ void getPossibleValues(int candidates, int *values, int *size)
 }
 
 
-void getnextemptysquare(int board[ROWS][COLS], 
+void getNextEmptySquare(int board[ROWS][COLS], 
                         const int curr_row, const int curr_col, 
                         int *next_row, int *next_col) {
 
@@ -225,8 +267,6 @@ void getnextemptysquare(int board[ROWS][COLS],
       }
     }
   }
-
-  return -1;
 }
 
 
@@ -272,10 +312,15 @@ int solve(int board[ROWS][COLS])
 {
   /* return initial_sweep(board); */
 
+  int i = 0, j = 0;
+
 #ifdef DEBUG
   printf("\n DEBUG: INSIDE solve()");
 #endif
-  return initial_sweep_bitwise(board);
+
+  getNextEmptySquare(board, 0, 0, &i, &j);
+
+  return (initial_sweep_bitwise(board) && fill(board, candidates, i, j));
   
 }
 
