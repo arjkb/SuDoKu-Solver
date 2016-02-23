@@ -37,6 +37,10 @@ int exist_3x3(int board[ROWS][COLS], const int element, const int curr_row, cons
 
 int initial_sweep_bitwise(int board[ROWS][COLS]);
 
+int fill(int board[ROWS][COLS], int candidate[ROWS][COLS], int curr_row, int curr_col);
+void getPossibleValues(const int candidates, int *values, int *size_of_values);
+void getNextEmptySquare(int board[ROWS][COLS], const int curr_row, const int curr_col, int *next_row, int *next_col);
+
 void setbit(int *, const int);
 void clearbit(int *, const int);
 void clear_all_bits(int *bitpattern);
@@ -46,7 +50,7 @@ int is_single_bit_on(const int n);
 int get_single_set_position(const int bitpattern);
 
 void initializeCandidates();
-void determineCandidates(int board[ROWS][COLS]);
+void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]);
 
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
@@ -118,8 +122,115 @@ void initializeCandidates()
 
 }
 
+/*** Function Definitions ***/
 
-void determineCandidates(int board[ROWS][COLS]) 
+/** Backtracker Funtion Definitions **/
+
+void fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
+{
+  int i, j;
+  int k = 0; 
+
+  int m, n; /* indices of next empty square */
+
+  int *val = malloc(MAX_COUNT * sizeof(int));
+  int *size = malloc(sizeof(int));
+
+  /* Duplicating board[][] */
+  int B[ROWS][COLS];
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      B[i][j] = board[i][j];
+    }
+  }
+
+
+  /* Duplicating candy[][] */
+  int C[ROWS][COLS];
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      C[i][j] = candy[i][j];
+    }
+  }
+  
+  getPossibleValues(C, val, size);
+  getNextEmptySquare(B, r, c, m, n);
+
+  do
+  {
+    int empty_count = calcEmptySquares(B);
+
+    if( *size > 0 )
+    {
+      B[i][j] = val[k];
+      k++;
+    }
+
+  }while(val != NULL)
+}
+
+int calcEmptySquares(int B[ROWS][COLS])
+{
+  int i, j;
+  int count = 0;
+
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      if(B[i][j] == 0)  count++;
+    }
+  }
+}
+
+void getPossibleValues(int candidates, int *values, int *size)
+{
+  int i = 0, b;
+
+  values = NULL;
+  *size = 0;
+
+  for(b = 0; b < 10; b++)
+  {
+    if(checkbit(candidates, b))
+    {
+      values[i] = b;
+      i++;
+    }
+  }
+
+  *size = i;
+}
+
+
+void getnextemptysquare(int board[ROWS][COLS], 
+                        const int curr_row, const int curr_col, 
+                        int *next_row, int *next_col) {
+
+  int i = curr_row, j = curr_col;
+
+  for( ; i < ROWS; i++)
+  {
+    for( ; j < COLS; j++)
+    {
+      if(board[i][j] == 0)  
+      {
+        *next_row = i;
+        *next_col = j;
+        return;
+      }
+    }
+  }
+
+  return -1;
+}
+
+
+void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]) 
 {
   int i, j, val;
 
@@ -190,7 +301,7 @@ int initial_sweep_bitwise(int board[ROWS][COLS])
 
   do  
   {
-    determineCandidates(board);
+    determineCandidates(board, candidates);
     count = 0;
     for(i = 0; i < ROWS; i++)
     {
