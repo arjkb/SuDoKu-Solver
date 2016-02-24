@@ -105,7 +105,7 @@ int main()
 
 /*** FUNCTION DEFINTIIONS ***/
 
-void initializeCandidates()  
+void initializeCandidates(int board[ROWS][COLS])  
 {
   int SET_1_9 = 1022;
   int i, j;
@@ -118,7 +118,14 @@ void initializeCandidates()
   {
     for(j = 0; j < COLS; j++)
     {
-      candidates[i][j] = SET_1_9;
+      if(board[i][j] == 0)
+      {
+        candidates[i][j] = SET_1_9;
+      }
+      else
+      {
+        candidates[i][j] = 0;
+      }
     }
   }
 
@@ -161,8 +168,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     }
   }
   
-  getPossibleValues(C[i][j], val, &size);
-
+  getPossibleValues(C[r][c], val, &size);
+#ifdef DEBUG
+  printf("\n Size: %d\n", size);
+#endif
   do
   {
     int empty_count;
@@ -171,7 +180,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     /* Fill in current square */
     if((size > 0) && (k < size))
     {
-      B[i][j] = val[k];
+      B[r][c] = val[k];
+#ifdef DEBUG
+      printf("\n FILLED FROM FILL\n");
+#endif
       k++;
     }
 
@@ -193,7 +205,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     }
 
     determineCandidates(B, C);
-    getNextEmptySquare(B, i, j, &m, &n);
+    getNextEmptySquare(B, r, c, &m, &n);
     result = fill(B, C, m, n);
 
     if(result == 1)
@@ -253,11 +265,14 @@ void getNextEmptySquare(int board[ROWS][COLS],
                         const int curr_row, const int curr_col, 
                         int *next_row, int *next_col) {
 
-  int i = curr_row, j = curr_col;
+  int i = curr_row, j = curr_col + 1;
 
-  for( ; i < ROWS; i++)
+  *next_row = -1;
+  *next_col = -1;
+
+  for(i = curr_row; i < ROWS; i++)
   {
-    for( ; j < COLS; j++)
+    for(j = 0; j < COLS; j++)
     {
       if(board[i][j] == 0)  
       {
@@ -267,6 +282,10 @@ void getNextEmptySquare(int board[ROWS][COLS],
       }
     }
   }
+
+#ifdef DEBUG
+  printf("\n Reached end of getNES\n");
+ #endif
 }
 
 
@@ -336,7 +355,7 @@ int initial_sweep_bitwise(int board[ROWS][COLS])
   printf("\n DEBUG: inside initial_sweep_bitwise() INTIALIZING");
 #endif
   
-  initializeCandidates();
+  initializeCandidates(board);
 
 #ifdef DEBUG
   printf("\n INITIALIZED\n");
