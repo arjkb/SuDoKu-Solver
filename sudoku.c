@@ -137,6 +137,10 @@ void initializeCandidates(int board[ROWS][COLS])
 
 int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 {
+  static int LEVEL;
+
+  LEVEL++;
+
   int i, j;
   int k = 0; 
 
@@ -148,6 +152,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
   
   int B[ROWS][COLS];
   int C[ROWS][COLS];
+
+#ifdef DEBUG
+  printf("\n Fill Level: %d\n", LEVEL);
+#endif
 
   /* Duplicating Board */
   for(i = 0; i < ROWS; i++)
@@ -182,7 +190,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     {
       B[r][c] = val[k];
 #ifdef DEBUG
-      printf("\n FILLED FROM FILL\n");
+      printf("\n FILLED FROM FILL %d %d %d\n", r, c, val[k]);
 #endif
       k++;
     }
@@ -212,6 +220,11 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     {
       int ii, jj;
       /* SOLVED */
+
+      #ifdef DEBUG
+      printf("\n >>>>>>>>> SOLVED!!! <<<<<<<<<<");
+      #endif
+      
       for(ii = 0; ii < ROWS; ii++)
       {
         for(jj = 0; jj < COLS; jj++)
@@ -248,6 +261,10 @@ void getPossibleValues(int candidates, int *values, int *size)
 
   *size = 0;
 
+#ifdef DEBUG
+  printf("\n Candidate in GPV: %d\n", candidates);
+#endif
+
   for(b = 0; b < 10; b++)
   {
     if(checkbit(candidates, b))
@@ -258,6 +275,10 @@ void getPossibleValues(int candidates, int *values, int *size)
   }
 
   *size = i;
+
+#ifdef DEBUG
+  printf("\n Size in GPV: %d", *size);
+#endif
 }
 
 
