@@ -54,6 +54,9 @@ int get_single_set_position(const int bitpattern);
 void initializeCandidates();
 void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]);
 
+void printCandidates(const int *array, const int LEN, const int r, const int c);
+void printLinear(int array[ROWS][COLS]);
+
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
 int ifexist_3x3(const int element, const int row_start, const int col_start);
@@ -105,12 +108,38 @@ int main()
 
 /*** FUNCTION DEFINTIIONS ***/
 
+int solve(int board[ROWS][COLS])
+{
+  /* return initial_sweep(board); */
+
+  int i = 0, j = 0;
+
+  int r_isb = -2;
+  int r_fill = -2;
+
+#ifdef DEBUG
+  printf("\n DEBUG: INSIDE solve()");
+#endif
+
+  getNextEmptySquare(board, 0, 0, &i, &j);
+
+  r_isb = initial_sweep_bitwise(board);
+  r_fill = fill(board, candidates, i, j);
+
+#ifdef DEBUG
+  printf("\n r_isb: %d", r_isb);
+  printf("\n r_fill: %d", r_fill);
+#endif
+
+  return (r_isb && r_fill);  
+}
+
 void initializeCandidates(int board[ROWS][COLS])  
 {
   int SET_1_9 = 1022;
   int i, j;
 
-#ifdef debug
+#ifdef DEBUG
   printf("\n DEBUG: inside initializecandidates()");
 #endif
 
@@ -131,15 +160,11 @@ void initializeCandidates(int board[ROWS][COLS])
 
 }
 
-/*** Function Definitions ***/
-
 /** Backtracker Funtion Definitions **/
 
 int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 {
   static int LEVEL;
-
-  LEVEL++;
 
   int i, j;
   int k = 0; 
@@ -153,7 +178,9 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
   int B[ROWS][COLS];
   int C[ROWS][COLS];
 
-#ifdef DEBUG
+  LEVEL++;
+
+#ifdef DEBUGT
   printf("\n Fill Level: %d\n", LEVEL);
 #endif
 
@@ -178,7 +205,8 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
   
   getPossibleValues(C[r][c], val, &size);
 #ifdef DEBUG
-  printf("\n Size: %d\n", size);
+  printf("\n Size (%d, %d): %d", r, c, size);
+  printCandidates(val, size, r, c);
 #endif
   do
   {
@@ -189,13 +217,21 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     if((size > 0) && (k < size))
     {
       B[r][c] = val[k];
+      
+      determineCandidates(B, C);
 #ifdef DEBUG
-      printf("\n FILLED FROM FILL %d %d %d\n", r, c, val[k]);
+      printCandidates(val, size, r, c);
+      printf("\n FILLED FROM FILL (%d,%d) %d", r, c, val[k]);
+      printLinear(B);
 #endif
       k++;
     }
 
     empty_count = calcEmptySquares(B);
+
+#ifdef DEBUG
+      printf("\n Empty Count: %d (%d) ", empty_count, LEVEL);
+#endif
     if(empty_count == 0)  
     {
       /* Base case #1
@@ -209,10 +245,15 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       /* Base case #2
        * There are no more potential values to try out
        */
+
+      #ifdef DEBUG
+      printf("\n No more values to try out at (%d, %d) %d", r, c, LEVEL);
+      #endif
+
       return -1;
     }
 
-    determineCandidates(B, C);
+    /* determineCandidates(B, C); */
     getNextEmptySquare(B, r, c, &m, &n);
     result = fill(B, C, m, n);
 
@@ -235,8 +276,17 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       return 1;
     }
 
-  }while(k < size);
+#ifdef DEBUG
+    if( k < size) 
+    {
+      printf("\n Looping Again %d", LEVEL);
+    }
+#endif    
 
+  }while(k < size);
+#ifdef DEBUG
+/*  print_board(board, "Board in FILL(): "); */
+#endif
   return -1;
 }
 
@@ -295,6 +345,11 @@ void getNextEmptySquare(int board[ROWS][COLS],
   {
     for(j = 0; j < COLS; j++)
     {
+      if( i == 0 && j == 5 )  
+      {
+        printf("\n BOO: %d", board[i][j]);
+      }
+
       if(board[i][j] == 0)  
       {
         *next_row = i;
@@ -306,13 +361,39 @@ void getNextEmptySquare(int board[ROWS][COLS],
 
 #ifdef DEBUG
   printf("\n Reached end of getNES\n");
- #endif
+#endif
 }
 
 
-void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]) 
+void printCandidates(const int *array, const int LEN, 
+                      const int r, const int c)
+{
+  int i;
+  printf("\n Candidates at (%d, %d): ", r, c);
+  for(i = 0; i < LEN; i++)  
+  {
+    printf(" %d", array[i]);
+  }
+}
+
+void printLinear(int array[ROWS][COLS])
+{
+  int i, j;
+  printf("\n >>> ");
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      printf("%d", array[i][j]);
+    }
+  }
+}
+
+void determineCandidates(int board[ROWS][COLS], int cand[ROWS][COLS]) 
 {
   int i, j, val;
+
+  initializeCandidates(board);
 
   /* Go row-wise */
   for(i = 0; i < ROWS; i++)
@@ -328,40 +409,41 @@ void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS])
           /* clear the bits for impossible candidates 
            * if value exists in the same row 
            */
-          clearbit(&candidates[i][j], val);
+          clearbit(&cand[i][j], val);
+#ifdef DEBUG
+          if((i == 0) && (j == 2) && (val == 7))
+          {
+            printf("\n Cleared %d at (%d, %d)!!", val, i, j);
+          }
+#endif          
         }
       
         if(exist_col(board, val, i, j))
         {
           /* clear the bits for impossible candidates if value exists in the same column 
            */
-          clearbit(&candidates[i][j], val);
+          clearbit(&cand[i][j], val);
+#ifdef DEBUG
+          if( i == 0 && j == 2 && val == 7 )
+          {
+            printf("\n Cleared %d at (%d, %d)!!", val, i, j);
+          }
+#endif          
         }
 
         if(exist_3x3(board, val, i, j))
         {
-          clearbit(&candidates[i][j], val);
+          clearbit(&cand[i][j], val);
+#ifdef DEBUG
+          if( i == 0 && j == 2 && val == 7 )
+          {
+            printf("\n Cleared %d at (%d, %d)!!", val, i, j);
+          }
+#endif          
         }
       }
     }
   }
-}
-
-
-int solve(int board[ROWS][COLS])
-{
-  /* return initial_sweep(board); */
-
-  int i = 0, j = 0;
-
-#ifdef DEBUG
-  printf("\n DEBUG: INSIDE solve()");
-#endif
-
-  getNextEmptySquare(board, 0, 0, &i, &j);
-
-  return (initial_sweep_bitwise(board) && fill(board, candidates, i, j));
-  
 }
 
 int initial_sweep_bitwise(int board[ROWS][COLS])
@@ -825,4 +907,9 @@ int get_single_set_position(const int bitpattern)
     
     default: return -1;
   }
+}
+
+void printbitpattern(int b) 
+{
+  
 }
