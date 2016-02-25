@@ -276,6 +276,16 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       return 1;
     }
 
+    else if(result == -1) 
+    {
+      /* The number that was filled in just now isn't right */
+
+      B[r][c] = 0;
+      determineCandidates(B, C); /* so that the candidate-bits that were turned off 
+                                  * will get turned on again
+                                  */
+    }
+
 #ifdef DEBUG
     if( k < size) 
     {
@@ -288,7 +298,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 /*  print_board(board, "Board in FILL(): "); */
 #endif
   return -1;
-}
+} /* end of fill() */
 
 int calcEmptySquares(int B[ROWS][COLS])
 {
