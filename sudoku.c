@@ -15,6 +15,9 @@
 #define ROWS 9
 #define COLS 9
 
+#define ON 2
+#define OFF 3
+
 int valid(const char *s);
 int illegal_char_error(const char *s);
 
@@ -58,6 +61,12 @@ void printCandidates(const int *array, const int LEN, const int r, const int c);
 void printLinear(int array[ROWS][COLS]);
 
 void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS]);
+
+void turn_bit_row(const int OPCODE, int candy[ROWS][COLS], const int R, const int bit);
+void turn_bit_col(const int OPCODE, int candy[ROWS][COLS], const int C, const int bit);
+
+void turnoff_bit_box(const int ROW, const int COL, const int bit);
+
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
 int ifexist_3x3(const int element, const int row_start, const int col_start);
@@ -304,6 +313,67 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], const int r, const int c)
 
   return -1;
 } /* end of fill() */
+
+
+void turn_bit_row(const int OPCODE, int candy[ROWS][COLS], const int R, const int bit)
+{
+  /* turns ON/OFF all bit in row R  */
+
+  int j;
+
+  if(OPCODE == OFF)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      clearbit(&candy[R][j], bit);
+    }
+  }
+
+  else if(OPCODE == ON)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      setbit(&candy[R][j], bit);
+    }
+  }
+
+  else  
+  {
+    printf("\n ERROR: You're calling turn_bit_row with OPCODE = %d", OPCODE);
+  }
+}
+
+void turn_bit_col(const int OPCODE, int candy[ROWS][COLS], const int C, const int bit)
+{
+  /* turns ON/OFF all bit in column C */
+
+  int i;
+  if(OPCODE == OFF)
+  {
+    for(i = 0; i < ROWS; i++)
+    {
+      clearbit(&candy[i][C], bit);
+    }
+  }
+
+  else if(OPCODE == ON)
+  {
+    for(i = 0; i < ROWS; i++)
+    {
+      setbit(&candy[i][C], bit);
+    }
+  }
+
+  else  
+  {
+    printf("\n ERROR: You're calling turn_bit_col with OPCODE = %d", OPCODE);
+  }
+}
+
+void turn_bit_box(int OPCODE, int board[ROWS][COLS], const int R, const int C, const int bit)
+{
+
+}
 
 int count_empty_squares(int B[ROWS][COLS])
 {
@@ -927,9 +997,4 @@ int get_single_set_position(const int bitpattern)
     
     default: return -1;
   }
-}
-
-void printbitpattern(int b) 
-{
-  
 }
