@@ -57,6 +57,7 @@ void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]);
 void printCandidates(const int *array, const int LEN, const int r, const int c);
 void printLinear(int array[ROWS][COLS]);
 
+void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS]);
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
 int ifexist_3x3(const int element, const int row_start, const int col_start);
@@ -160,6 +161,18 @@ void initializeCandidates(int board[ROWS][COLS])
 
 }
 
+void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS])
+{
+  int i, j;
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < ROWS; j++)
+    {
+      dest[i][j] = source[i][j];
+    }
+  }
+}
+
 /** Backtracker Funtion Definitions **/
 
 int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
@@ -184,7 +197,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
   printf("\n Fill Level: %d\n", LEVEL);
 #endif
 
-  /* Duplicating Board */
+  /* Duplicating Board 
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < COLS; j++)
@@ -192,9 +205,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       B[i][j] = board[i][j];
     }
   }
+  */
 
 
-  /* Duplicating candy[][] */
+  /* Duplicating candy[][]
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < COLS; j++)
@@ -202,6 +216,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       C[i][j] = candy[i][j];
     }
   }
+  */
+
+  copyMatrix(board, B);
+  copyMatrix(candy, C);
   
   getPossibleValues(C[r][c], val, &size);
 #ifdef DEBUG
@@ -281,6 +299,9 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       /* The number that was filled in just now isn't right */
 
       B[r][c] = 0;
+      #ifdef DEBUG
+      printf("\n Re-determining candidates! %d", LEVEL);
+      #endif
       determineCandidates(B, C); /* so that the candidate-bits that were turned off 
                                   * will get turned on again
                                   */
