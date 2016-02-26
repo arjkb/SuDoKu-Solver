@@ -38,8 +38,8 @@ int exist_3x3(int board[ROWS][COLS], const int element, const int curr_row, cons
 
 int initial_sweep_bitwise(int board[ROWS][COLS]);
 
-int fill(int board[ROWS][COLS], int candidate[ROWS][COLS], int curr_row, int curr_col);
-int calcEmptySquares(int B[ROWS][COLS]);
+int fill(int board[ROWS][COLS], int candidate[ROWS][COLS], const int curr_row, const int curr_col);
+int count_empty_squares(int B[ROWS][COLS]);
 void getNextEmptySquare(int board[ROWS][COLS], const int curr_row, const int curr_col, int *next_row, int *next_col);
 void getPossibleValues(const int candidates, int *values, int *size_of_values);
 
@@ -175,20 +175,22 @@ void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS])
 
 /** Backtracker Funtion Definitions **/
 
-int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
+int fill(int board[ROWS][COLS], int candy[ROWS][COLS], const int r, const int c)
 {
   static int LEVEL;
 
-  int k = 0; 
-
-  int m, n; /* indices of next empty square */
+  int m = -1, n = -1; /* indices of next empty square */
 
   int *val = malloc(MAX_COUNT * sizeof(int));
-  int size = -1;
-
+  int k = 0; /* variable used to index val */
+  int size = -1; /* would store size of val */
   
   int B[ROWS][COLS];
   int C[ROWS][COLS];
+
+  /* Make local copies of incoming parameters */
+  copyMatrix(board, B);
+  copyMatrix(candy, C);
 
   LEVEL++;
 
@@ -196,9 +198,6 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
   printf("\n Fill Level: %d\n", LEVEL);
 #endif
 
-  copyMatrix(board, B);
-  copyMatrix(candy, C);
-  
   getPossibleValues(C[r][c], val, &size);
 #ifdef DEBUG
   printf("\n Size (%d, %d): %d", r, c, size);
@@ -223,7 +222,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       k++;
     }
 
-    empty_count = calcEmptySquares(B);
+    empty_count = count_empty_squares(B);
 
 #ifdef DEBUG
       printf("\n Empty Count: %d (%d) ", empty_count, LEVEL);
@@ -233,6 +232,8 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
       /* Base case #1
        * All squares filled in
        */
+
+      copyMatrix(B, board); 
       return 1;
     }
 
@@ -242,6 +243,8 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
        * There are no more potential values to try out
        */
 
+      B[r][c] = 0;
+      free(val);
       #ifdef DEBUG
       printf("\n No more values to try out at (%d, %d) %d", r, c, LEVEL);
       #endif
@@ -269,6 +272,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
     {
       /* The number that was filled in just now isn't right */
 
+#ifdef DEBUG
+      printf("\n %d at (%d, %d) isn't right!", B[r][c], r, c);
+#endif
+
       B[r][c] = 0;
       #ifdef DEBUG
       printf("\n Re-determining candidates! %d", LEVEL);
@@ -289,11 +296,21 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 #ifdef DEBUG
 /*  print_board(board, "Board in FILL(): "); */
 #endif
+
+  if(val != NULL) 
+  {
+    free(val);
+  }
+
   return -1;
 } /* end of fill() */
 
-int calcEmptySquares(int B[ROWS][COLS])
+int count_empty_squares(int B[ROWS][COLS])
 {
+  /* returns the number of squares that are empty.
+   * Does this by counting the number of squares with a 0 filled in
+   */
+
   int i, j;
   int count = 0;
 
@@ -347,10 +364,12 @@ void getNextEmptySquare(int board[ROWS][COLS],
   {
     for(j = 0; j < COLS; j++)
     {
+#ifdef DEBUG
       if( i == 0 && j == 5 )  
       {
         printf("\n BOO: %d", board[i][j]);
       }
+#endif      
 
       if(board[i][j] == 0)  
       {
@@ -568,8 +587,7 @@ int initial_sweep(int board[ROWS][COLS])
             board[i][j] = candidate_c;
             changed++;
             tot_change++;
-          }
-      
+          } 
         }
       } 
     }
