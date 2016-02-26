@@ -179,7 +179,6 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 {
   static int LEVEL;
 
-  int i, j;
   int k = 0; 
 
   int m, n; /* indices of next empty square */
@@ -196,27 +195,6 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 #ifdef DEBUGT
   printf("\n Fill Level: %d\n", LEVEL);
 #endif
-
-  /* Duplicating Board 
-  for(i = 0; i < ROWS; i++)
-  {
-    for(j = 0; j < COLS; j++)
-    {
-      B[i][j] = board[i][j];
-    }
-  }
-  */
-
-
-  /* Duplicating candy[][]
-  for(i = 0; i < ROWS; i++)
-  {
-    for(j = 0; j < COLS; j++)
-    {
-      C[i][j] = candy[i][j];
-    }
-  }
-  */
 
   copyMatrix(board, B);
   copyMatrix(candy, C);
@@ -277,20 +255,13 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], int r, int c)
 
     if(result == 1)
     {
-      int ii, jj;
       /* SOLVED */
 
       #ifdef DEBUG
       printf("\n >>>>>>>>> SOLVED!!! <<<<<<<<<<");
       #endif
       
-      for(ii = 0; ii < ROWS; ii++)
-      {
-        for(jj = 0; jj < COLS; jj++)
-        {
-          board[ii][jj] = B[ii][jj];
-        }
-      }  
+      copyMatrix(B, board); 
       return 1;
     }
 
