@@ -1,3 +1,10 @@
+/*
+ * Program to solve a sudoku puzzle.
+ *
+ * Arjun Krishna Babu
+ * (Fedora 24 running on Intel i5)
+ */
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
