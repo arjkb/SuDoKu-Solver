@@ -51,9 +51,15 @@ int exist_3x3(int board[ROWS][COLS], const int element, const int curr_row, cons
 
 int initial_sweep_bitwise(int board[ROWS][COLS]);
 
+void get_fillable_square(int board[ROWS][COLS], int *r, int *c);
+int fill(int board[ROWS][COLS], int candidate[ROWS][COLS]);
+
+#ifdef OLD_FILL
 int fill(int board[ROWS][COLS], int candidate[ROWS][COLS], const int curr_row, const int curr_col);
-int count_empty_squares(int B[ROWS][COLS]);
 void getNextEmptySquare(int board[ROWS][COLS], const int curr_row, const int curr_col, int *next_row, int *next_col);
+#endif
+
+int count_empty_squares(int B[ROWS][COLS]);
 void getPossibleValues(const int candidates, int *values, int *size_of_values);
 
 void setbit(int *, const int);
@@ -141,10 +147,14 @@ int solve(int board[ROWS][COLS])
   printf("\n DEBUG: INSIDE solve()");
 #endif
 
-  getNextEmptySquare(board, 0, 0, &i, &j);
+/*  getNextEmptySquare(board, 0, 0, &i, &j); */
 
   r_isb = initial_sweep_bitwise(board);
+  r_fill = fill(board, candidates);
+
+#ifdef OLD_FILL
   r_fill = fill(board, candidates, i, j);
+#endif
 
 #ifdef DEBUG
   printf("\n r_isb: %d", r_isb);
@@ -193,6 +203,7 @@ void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS])
 }
 
 /** Backtracker Funtion Definitions **/
+
 int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
 {
   /* Fills the board */
@@ -214,10 +225,86 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
    *
    * When there are no more empty squares
    *  copy B back to board
-   *
    *  return SUCCESS
    */ 
-}
+  
+  /* 2D arrays to store local copies of board and candy */
+  int B[ROWS][COLS];
+  int C[ROWS][COLS];
+
+  int val[9] = {0};
+  int size = 0;
+  int k = 0;
+
+  int fillable_row, fillable_col;
+
+  int empty_count = 1;
+
+  int ret_val = FAIL;
+
+#ifdef DEBUG
+    printf("\n Inside fill()");
+#endif
+
+  determineCandidates(board, candy);
+
+  /* Copy data in to B and C */
+  copyMatrix(board, B);
+  copyMatrix(candy, C);
+
+  empty_count = count_empty_squares(B);
+
+#ifdef DEBUG
+    printf("\n Empty Count: %d", empty_count);
+#endif
+
+  if(empty_count) 
+  {
+    /* If there are still empty squares... */
+
+    get_fillable_square(B, &fillable_row, &fillable_col);
+    getPossibleValues(C[fillable_row][fillable_col], val, &size);
+
+    while( k < size )
+    {
+      #ifdef DEBUG
+        printf("\n Filling in %d at (%d, %d): ", val[k], fillable_row, fillable_col);
+      #endif
+
+      B[fillable_row][fillable_col] = val[k++];
+#ifdef DEBUG
+      printLinear(B);
+#endif
+      determineCandidates(B, C);
+
+      ret_val = fill(B, C);
+
+      if( ret_val == SUCCESS )  
+      {
+        #ifdef DEBUG
+          printf("\n Got back SUCCESS!");
+        #endif
+        break;
+      }
+    }
+
+#ifdef DEBUG
+    printf("\n Returning FAIL!");
+#endif
+    return FAIL;
+  }
+    
+  if( ret_val == SUCCESS || empty_count == 0 )
+  {
+    /* No more empty squares */
+    copyMatrix(B, board);
+#ifdef DEBUG
+    printf("\n Returning SUCCESS!");
+#endif
+    return SUCCESS;
+  }
+
+} /*** END OF FILL() ***/
 
 
 #ifdef OLD_FILL
@@ -431,7 +518,7 @@ int count_empty_squares(int B[ROWS][COLS])
   return count;
 }
 
-void getPossibleValues(int candidates, int *values, int *size)
+void getPossibleValues(int candidates, int values[9],  int *size)
 {
   int i = 0, b;
 
@@ -457,11 +544,34 @@ void getPossibleValues(int candidates, int *values, int *size)
 #endif
 }
 
+void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
+{
+  int i, j;
 
+  *r = -1;
+  *c = -1;
+
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      if(board[i][j] == 0)
+      {
+        *r = i;
+        *c = j;
+        return;
+      }
+    }
+  }
+  
+  printf("\n POTENTIAL ERROR: Didn't find an empty square! (This is a point you aren't supposed to reach!)");
+}
+
+#ifdef OLD_FILL
 void getNextEmptySquare(int board[ROWS][COLS], 
                         const int curr_row, const int curr_col, 
-                        int *next_row, int *next_col) {
-
+                        int *next_row, int *next_col) 
+{
   int i = curr_row, j = curr_col + 1;
 
   *next_row = -1;
@@ -491,6 +601,7 @@ void getNextEmptySquare(int board[ROWS][COLS],
   printf("\n Reached end of getNES\n");
 #endif
 }
+#endif
 
 
 void printCandidates(const int *array, const int LEN, 
@@ -1033,5 +1144,5 @@ int get_single_set_position(const int bitpattern)
     case 512: return 9;
     
     default: return -1;
-  }
+   }
 }
