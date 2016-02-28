@@ -246,11 +246,12 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
     printf("\n Inside fill()");
 #endif
 
-  determineCandidates(board, candy);
 
   /* Copy data in to B and C */
   copyMatrix(board, B);
   copyMatrix(candy, C);
+
+/*  determineCandidates(B, C); */
 
   empty_count = count_empty_squares(B);
 
@@ -267,6 +268,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
 
     while( k < size )
     {
+      copyMatrix(candy, C);
       #ifdef DEBUG
         printf("\n Filling in %d at (%d, %d): ", val[k], fillable_row, fillable_col);
       #endif
