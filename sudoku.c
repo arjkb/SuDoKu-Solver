@@ -258,7 +258,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
   copyMatrix(board, B);
   copyMatrix(candy, C);
 
-/*  determineCandidates(B, C); */
+  determineCandidates(B, C); 
 
   empty_count = count_empty_squares(B);
 
@@ -273,10 +273,14 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
     get_fillable_square(B, &fillable_row, &fillable_col);
     getPossibleValues(C[fillable_row][fillable_col], val, &size);
 
+#ifdef DEBUG
+    printCandidates(val, size, fillable_row, fillable_col);        
+#endif
     while( k < size )
     {
       copyMatrix(candy, C);
       #ifdef DEBUG
+        printCandidates(val, size, fillable_row, fillable_col);        
         printf("\n Filling in %d at (%d, %d): ", val[k], fillable_row, fillable_col);
       #endif
 
@@ -291,224 +295,36 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
       if( ret_val == SUCCESS )  
       {
         #ifdef DEBUG
-          printf("\n Got back SUCCESS!");
+          printf("\n Got back SUCCESS! (%d, %d)", fillable_row, fillable_col);
         #endif
 
         copyMatrix(B, board);
+        copyMatrix(C, candy);
         return SUCCESS;
       }
-    }
+    } /* end of while() */
 
+    B[fillable_row][fillable_col] = 0;
 #ifdef DEBUG
-    printf("\n Returning FAIL!");
+    printf("\n Returning FAIL! (%d, %d)", fillable_row, fillable_col);
 #endif
+
     return FAIL;
   }
     
   if( ret_val == SUCCESS || empty_count == 0 )
   {
     /* No more empty squares */
+    /* BASE CASE OF SUCCESFULL SOLUTION! */
     copyMatrix(B, board);
 #ifdef DEBUG
-    printf("\n Returning SUCCESS!");
+    printf("\n Returning SUCCESS! (%d, %d)", fillable_row, fillable_col);
 #endif
     return SUCCESS;
   }
 
 } /*** END OF FILL() ***/
 
-
-#ifdef OLD_FILL
-int fill(int board[ROWS][COLS], int candy[ROWS][COLS], const int r, const int c)
-{
-  static int LEVEL;
-
-  int m = -1, n = -1; /* indices of next empty square */
-
-  int *val = malloc(MAX_COUNT * sizeof(int));
-  int k = 0; /* variable used to index val */
-  int size = -1; /* would store size of val */
-  
-  int B[ROWS][COLS];
-  int C[ROWS][COLS];
-
-  /* Make local copies of incoming parameters */
-  copyMatrix(board, B);
-  copyMatrix(candy, C);
-
-  LEVEL++;
-
-#ifdef DEBUGT
-  printf("\n Fill Level: %d\n", LEVEL);
-#endif
-
-  getPossibleValues(C[r][c], val, &size);
-#ifdef DEBUG
-  printf("\n Size (%d, %d): %d", r, c, size);
-  printCandidates(val, size, r, c);
-#endif
-  do
-  {
-    int empty_count;
-    int result;
-
-    /* Fill in current square */
-    if((size > 0) && (k < size))
-    {
-      B[r][c] = val[k];
-      
-      determineCandidates(B, C);
-#ifdef DEBUG
-      printCandidates(val, size, r, c);
-      printf("\n FILLED FROM FILL (%d,%d) %d", r, c, val[k]);
-      printLinear(B);
-#endif
-      k++;
-    }
-
-    empty_count = count_empty_squares(B);
-
-#ifdef DEBUG
-      printf("\n Empty Count: %d (%d) ", empty_count, LEVEL);
-#endif
-    if(empty_count == 0)  
-    {
-      /* Base case #1
-       * All squares filled in
-       */
-
-      copyMatrix(B, board); 
-      return 1;
-    }
-
-    if( size == 0 )
-    {
-      /* Base case #2
-       * There are no more potential values to try out
-       */
-
-      B[r][c] = 0;
-      free(val);
-      #ifdef DEBUG
-      printf("\n No more values to try out at (%d, %d) %d", r, c, LEVEL);
-      #endif
-
-      return -1;
-    }
-
-    /* determineCandidates(B, C); */
-    getNextEmptySquare(B, r, c, &m, &n);
-    result = fill(B, C, m, n);
-
-    if(result == 1)
-    {
-      /* SOLVED */
-
-      #ifdef DEBUG
-      printf("\n >>>>>>>>> SOLVED!!! <<<<<<<<<<");
-      #endif
-      
-      copyMatrix(B, board); 
-      return 1;
-    }
-
-    else if(result == -1) 
-    {
-      /* The number that was filled in just now isn't right */
-
-#ifdef DEBUG
-      printf("\n %d at (%d, %d) isn't right!", B[r][c], r, c);
-#endif
-
-      B[r][c] = 0;
-      #ifdef DEBUG
-      printf("\n Re-determining candidates! %d", LEVEL);
-      #endif
-      determineCandidates(B, C); /* so that the candidate-bits that were turned off 
-                                  * will get turned on again
-                                  */
-    }
-
-#ifdef DEBUG
-    if( k < size) 
-    {
-      printf("\n Looping Again %d", LEVEL);
-    }
-#endif    
-
-  }while(k < size);
-#ifdef DEBUG
-/*  print_board(board, "Board in FILL(): "); */
-#endif
-
-  if(val != NULL) 
-  {
-    free(val);
-  }
-
-  return -1;
-} /* end of fill() */
-#endif
-
-void turn_bit_row(const int OPCODE, int candy[ROWS][COLS], const int R, const int bit)
-{
-  /* turns ON/OFF all bit in row R  */
-
-  int j;
-
-  if(OPCODE == OFF)
-  {
-    for(j = 0; j < COLS; j++)
-    {
-      clearbit(&candy[R][j], bit);
-    }
-  }
-
-  else if(OPCODE == ON)
-  {
-    for(j = 0; j < COLS; j++)
-    {
-      setbit(&candy[R][j], bit);
-    }
-  }
-
-  else  
-  {
-    printf("\n ERROR: You're calling turn_bit_row with OPCODE = %d", OPCODE);
-  }
-}
-
-void turn_bit_col(const int OPCODE, int candy[ROWS][COLS], const int C, const int bit)
-{
-  /* turns ON/OFF all bit in column C */
-
-  int i;
-  if(OPCODE == OFF)
-  {
-    for(i = 0; i < ROWS; i++)
-    {
-      clearbit(&candy[i][C], bit);
-    }
-  }
-
-  else if(OPCODE == ON)
-  {
-    for(i = 0; i < ROWS; i++)
-    {
-      setbit(&candy[i][C], bit);
-    }
-  }
-
-  else  
-  {
-    printf("\n ERROR: You're calling turn_bit_col with OPCODE = %d", OPCODE);
-  }
-}
-
-void turn_bit_box(int OPCODE, int board[ROWS][COLS], const int R, const int C, const int bit)
-{
-
-}
 
 int count_empty_squares(int B[ROWS][COLS])
 {
