@@ -123,7 +123,9 @@ int main()
       
       if( solvecount > 0 ) 
       {
-        print_board(board, "Partially Filled in Board: ");
+/*        print_board(board, "Partially Filled in Board: "); */
+
+        printLinear(board);
       }
     }
     
@@ -160,6 +162,11 @@ int solve(int board[ROWS][COLS])
   printf("\n r_isb: %d", r_isb);
   printf("\n r_fill: %d", r_fill);
 #endif
+
+  if(r_fill == SUCCESS) 
+  {
+    printf("\n SOLVED!");
+  }
 
   return (r_isb && r_fill);  
 }
@@ -286,7 +293,9 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
         #ifdef DEBUG
           printf("\n Got back SUCCESS!");
         #endif
-        break;
+
+        copyMatrix(B, board);
+        return SUCCESS;
       }
     }
 
@@ -620,7 +629,6 @@ void printCandidates(const int *array, const int LEN,
 void printLinear(int array[ROWS][COLS])
 {
   int i, j;
-  printf("\n >>> ");
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < COLS; j++)
