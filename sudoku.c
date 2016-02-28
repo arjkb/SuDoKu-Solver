@@ -18,6 +18,9 @@
 #define ON 2
 #define OFF 3
 
+#define SUCCESS 1
+#define FAIL  0
+
 int valid(const char *s);
 int illegal_char_error(const char *s);
 
@@ -183,7 +186,34 @@ void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS])
 }
 
 /** Backtracker Funtion Definitions **/
+int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
+{
+  /* Fills the board */
 
+  /* copy board to B, and candy to C
+   * get the next fillable square
+   *
+   * Add the candidates of that square into VAL
+   *
+   * Add an element of VAL into the square
+   * call fill()
+   */
+
+  /* BASE CASES
+   *
+   * When candidates of an empty  square cannot be determined 
+   * (since it got cancelled away due to previous erroneus entries)
+   *  return FAIL
+   *
+   * When there are no more empty squares
+   *  copy B back to board
+   *
+   *  return SUCCESS
+   */ 
+}
+
+
+#ifdef OLD_FILL
 int fill(int board[ROWS][COLS], int candy[ROWS][COLS], const int r, const int c)
 {
   static int LEVEL;
@@ -313,7 +343,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS], const int r, const int c)
 
   return -1;
 } /* end of fill() */
-
+#endif
 
 void turn_bit_row(const int OPCODE, int candy[ROWS][COLS], const int R, const int bit)
 {
