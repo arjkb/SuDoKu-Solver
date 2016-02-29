@@ -12,7 +12,7 @@
 #include<math.h>
 #include<assert.h>
 
-#define DEBUGW
+#define DEBUGQ
 
 #define TRUE 1
 #define FALSE 0
@@ -179,10 +179,10 @@ int solve(int board[ROWS][COLS])
   }
   else 
   {
-    printf("\n No solution");
+   /* printf("\n No solution"); */
   }
-
-  return (r_isb && r_fill);  
+  
+  return r_fill; 
 }
 
 void initializeCandidates(int board[ROWS][COLS])  
@@ -535,6 +535,7 @@ void determineCandidates(int board[ROWS][COLS], int cand[ROWS][COLS])
     }
   }
 
+#ifdef  DEBUG
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < ROWS; j++)
@@ -542,6 +543,7 @@ void determineCandidates(int board[ROWS][COLS], int cand[ROWS][COLS])
       assert(cand[i][j] >= 0 && cand[i][j] <= 1022);
     }
   }
+#endif
 
 }
 
