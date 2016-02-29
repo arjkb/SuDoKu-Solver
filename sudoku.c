@@ -12,7 +12,7 @@
 #include<math.h>
 #include<assert.h>
 
-#define DEBUG
+#define DEBUGW
 
 #define TRUE 1
 #define FALSE 0
@@ -167,6 +167,11 @@ int solve(int board[ROWS][COLS])
   if(r_fill == SUCCESS) 
   {
     printf("\n SOLVED!");
+    printLinear(board);
+  }
+  else 
+  {
+    printf("\n No solution");
   }
 
   return (r_isb && r_fill);  
