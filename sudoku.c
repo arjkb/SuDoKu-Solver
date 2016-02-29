@@ -10,6 +10,7 @@
 #include<string.h>
 #include<ctype.h>
 #include<math.h>
+#include<assert.h>
 
 #define DEBUG
 
@@ -253,7 +254,6 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
     printf("\n Inside fill()");
 #endif
 
-
   /* Copy data in to B and C */
   copyMatrix(board, B);
   copyMatrix(candy, C);
@@ -271,6 +271,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
     /* If there are still empty squares... */
 
     get_fillable_square(B, &fillable_row, &fillable_col);
+
+    assert(fillable_row >= 0 && fillable_row <= 9);
+    assert(fillable_col >= 0 && fillable_col <= 9);
+
     getPossibleValues(C[fillable_row][fillable_col], val, &size);
 
 #ifdef DEBUG
@@ -509,6 +513,15 @@ void determineCandidates(int board[ROWS][COLS], int cand[ROWS][COLS])
       }
     }
   }
+
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < ROWS; j++)
+    {
+      assert(cand[i][j] >= 0 && cand[i][j] <= 1022);
+    }
+  }
+
 }
 
 int initial_sweep_bitwise(int board[ROWS][COLS])
@@ -923,6 +936,9 @@ int checkbit(int n, const int b)
    *  0 otherwise
    */
   
+#ifdef DEBUG
+  assert(b >= 0 && b <= 9);
+#endif
   return (n & (getBitval(b)))?1:0;
 }
 
@@ -930,6 +946,9 @@ void setbit(int *n, const int b)
 {
   /* sets the bth bit of n */
 
+#ifdef DEBUG
+  assert(b >= 0 && b <= 9);
+#endif
   *n |= getBitval(b);
 }
 
@@ -937,8 +956,10 @@ void clearbit(int *n, const int b)
 {
   /* clears bth bit of n */
 
+#ifdef DEBUG
+  assert(b >= 0 && b <= 9);
+#endif
   *n &= ~(getBitval(b));
-
 }
 
 void clear_all_bits(int *bitpattern)
@@ -969,6 +990,8 @@ int get_single_set_position(const int bitpattern)
     case 256: return 8;
     case 512: return 9;
     
-    default: return -1;
+    default: printf("\n ERROR: get_single_set_position(%d)", bitpattern);
+             assert(bitpattern >= 0 && bitpattern <= 512); 
+            return -1;
    }
 }
