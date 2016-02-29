@@ -119,14 +119,20 @@ int main()
     else
     {
       /* solve the SuDoKu */
+#ifdef  DEBUG      
       print_board(board, "Board:"); 
+#endif      
       solvecount = solve(board);
       
       if( solvecount > 0 ) 
       {
 /*        print_board(board, "Partially Filled in Board: "); */
 
-        printLinear(board);
+        printLinear(board); 
+      }
+      else
+      {
+        printf("No solution\n");
       }
     }
     
@@ -166,8 +172,10 @@ int solve(int board[ROWS][COLS])
 
   if(r_fill == SUCCESS) 
   {
+#ifdef  DEBUG    
     printf("\n SOLVED!");
     printLinear(board);
+#endif    
   }
   else 
   {
@@ -468,6 +476,7 @@ void printLinear(int array[ROWS][COLS])
       printf("%d", array[i][j]);
     }
   }
+  printf("\n");
 }
 
 void determineCandidates(int board[ROWS][COLS], int cand[ROWS][COLS]) 
