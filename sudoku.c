@@ -344,7 +344,8 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
 #endif
     return SUCCESS;
   }
-
+  printf("\n End of fill(). You weren't supposed to reach here!");
+  return FAIL;
 } /*** END OF FILL() ***/
 
 
