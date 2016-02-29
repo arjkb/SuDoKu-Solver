@@ -312,7 +312,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
 #ifdef DEBUG
       printLinear(B);
 #endif
-      determineCandidates(B, C);
+/*      determineCandidates(B, C); */
 
       ret_val = fill(B, C);
 
