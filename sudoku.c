@@ -415,43 +415,6 @@ void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
   printf("\n POTENTIAL ERROR: Didn't find an empty square! (This is a point you aren't supposed to reach!)");
 }
 
-#ifdef OLD_FILL
-void getNextEmptySquare(int board[ROWS][COLS], 
-                        const int curr_row, const int curr_col, 
-                        int *next_row, int *next_col) 
-{
-  int i = curr_row, j = curr_col + 1;
-
-  *next_row = -1;
-  *next_col = -1;
-
-  for(i = curr_row; i < ROWS; i++)
-  {
-    for(j = 0; j < COLS; j++)
-    {
-#ifdef DEBUG
-      if( i == 0 && j == 5 )  
-      {
-        printf("\n BOO: %d", board[i][j]);
-      }
-#endif      
-
-      if(board[i][j] == 0)  
-      {
-        *next_row = i;
-        *next_col = j;
-        return;
-      }
-    }
-  }
-
-#ifdef DEBUG
-  printf("\n Reached end of getNES\n");
-#endif
-}
-#endif
-
-
 void printCandidates(const int *array, const int LEN, 
                       const int r, const int c)
 {
@@ -550,17 +513,17 @@ void determineCandidates(int board[ROWS][COLS], int cand[ROWS][COLS])
 
 int initial_sweep_bitwise(int board[ROWS][COLS])
 {
-  int i, j, count, tot_change;
+  int i, j;
 
-  count = 0;
-  tot_change = 0;
+  int count = 0;
+  int tot_change = 0;
 
 
 #ifdef DEBUG
   printf("\n DEBUG: inside initial_sweep_bitwise() INTIALIZING");
 #endif
   
-  initializeCandidates(board);
+/*  initializeCandidates(board); */
 
 #ifdef DEBUG
   printf("\n INITIALIZED\n");
@@ -581,7 +544,9 @@ int initial_sweep_bitwise(int board[ROWS][COLS])
           /* Fill the number if only a single bit is turned on */
 
           board[i][j] = get_single_set_position(candidates[i][j]);
-          clear_all_bits(&candidates[i][j]);
+
+          candidates[i][j] = 0;
+/*          clear_all_bits(&candidates[i][j]); */
           count++;
 
           #ifdef DEBUG
