@@ -416,7 +416,30 @@ void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
   
   printf("\n POTENTIAL ERROR: Didn't find an empty square! (This is a point you aren't supposed to reach!)");
 }
+/*
+void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
+{
+  int i, j;
 
+  *r = -1;
+  *c = -1;
+
+  for(i = 0; i < ROWS; i++)
+  {
+    for(j = 0; j < COLS; j++)
+    {
+      if(board[i][j] == 0)
+      {
+        *r = i;
+        *c = j;
+        return;
+      }
+    }
+  }
+  
+  printf("\n POTENTIAL ERROR: Didn't find an empty square! (This is a point you aren't supposed to reach!)");
+}
+*/
 void printCandidates(const int *array, const int LEN, 
                       const int r, const int c)
 {
@@ -917,7 +940,16 @@ int getBitval(const int n)
   /* helper function to return a bit pattern that 
    * returns an int with the nth bit turned on
    */
-
+  if(n >= 0 && n <= 9)
+  {
+    return (1 << n);
+  }
+  else
+  {
+    printf("\n Error: getBitval(%d) invalid argument", n);
+    return -1;
+  }
+/*
   switch(n)
   {
     case 0: return 1;
@@ -934,7 +966,7 @@ int getBitval(const int n)
              assert(n >= 0 && n <= 9); 
             return -1;
   }
-
+*/
 /*  return (int) pow(2, (int)n); */
 }
 
