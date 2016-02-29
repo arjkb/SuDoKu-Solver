@@ -185,6 +185,8 @@ void initializeCandidates(int board[ROWS][COLS])
   {
     for(j = 0; j < COLS; j++)
     {
+      candidates[i][j] = SET_1_9;
+/*      
       if(board[i][j] == 0)
       {
         candidates[i][j] = SET_1_9;
@@ -192,7 +194,9 @@ void initializeCandidates(int board[ROWS][COLS])
       else
       {
         candidates[i][j] = 0;
+        
       }
+*/      
     }
   }
 
@@ -269,6 +273,8 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
   if(empty_count) 
   {
     /* If there are still empty squares... */
+    size = 0;
+    k = 0;
 
     get_fillable_square(B, &fillable_row, &fillable_col);
 
@@ -280,6 +286,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
 #ifdef DEBUG
     printCandidates(val, size, fillable_row, fillable_col);        
 #endif
+
     while( k < size )
     {
       copyMatrix(candy, C);
