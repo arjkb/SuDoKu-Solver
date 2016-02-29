@@ -255,6 +255,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
   int val[9] = {0};
   int size = 0;
   int k = 0;
+  int x;
 
   int fillable_row, fillable_col;
 
@@ -981,7 +982,7 @@ int is_single_bit_on(const int x)
 int get_single_set_position(const int bitpattern)
 {
   switch(bitpattern)
-  {
+  { 
     case 1: return 0;
 
     case 2: return 1;
@@ -997,7 +998,7 @@ int get_single_set_position(const int bitpattern)
     case 512: return 9;
     
     default: printf("\n ERROR: get_single_set_position(%d)", bitpattern);
-             assert(bitpattern >= 0 && bitpattern <= 512); 
+             assert(bitpattern >= 1 && bitpattern <= 512); 
             return -1;
    }
 }
