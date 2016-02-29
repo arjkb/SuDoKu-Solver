@@ -29,6 +29,8 @@
 #define SUCCESS 1
 #define FAIL  0
 
+#define SET_1_9 1022
+
 int valid(const char *s);
 int illegal_char_error(const char *s);
 
@@ -78,11 +80,6 @@ void printCandidates(const int *array, const int LEN, const int r, const int c);
 void printLinear(int array[ROWS][COLS]);
 
 void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS]);
-
-void turn_bit_row(const int OPCODE, int candy[ROWS][COLS], const int R, const int bit);
-void turn_bit_col(const int OPCODE, int candy[ROWS][COLS], const int C, const int bit);
-
-void turnoff_bit_box(const int ROW, const int COL, const int bit);
 
 /*
 int ifexist_col(const int board[ROWS][COLS], const int element);
@@ -145,10 +142,6 @@ int main()
 
 int solve(int board[ROWS][COLS])
 {
-  /* return initial_sweep(board); */
-
-  int i = 0, j = 0;
-
   int r_isb = -2;
   int r_fill = -2;
 
@@ -187,7 +180,7 @@ int solve(int board[ROWS][COLS])
 
 void initializeCandidates(int board[ROWS][COLS])  
 {
-  int SET_1_9 = 1022;
+  const int SET_VALUE = 1022; 
   int i, j;
 
 #ifdef DEBUG
@@ -196,9 +189,11 @@ void initializeCandidates(int board[ROWS][COLS])
 
   for(i = 0; i < ROWS; i++)
   {
-    for(j = 0; j < COLS; j++)
+    for(j = 0; j < COLS; j += 3)
     {
-      candidates[i][j] = SET_1_9;
+      candidates[i][j] = SET_VALUE;
+      candidates[i][j+1] = SET_VALUE;
+      candidates[i][j+2] = SET_VALUE;
 /*      
       if(board[i][j] == 0)
       {
@@ -291,8 +286,10 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
 
     get_fillable_square(B, &fillable_row, &fillable_col);
 
+#ifdef  DEBUG
     assert(fillable_row >= 0 && fillable_row <= 9);
     assert(fillable_col >= 0 && fillable_col <= 9);
+#endif
 
     getPossibleValues(C[fillable_row][fillable_col], val, &size);
 
@@ -323,7 +320,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
         #endif
 
         copyMatrix(B, board);
-        copyMatrix(C, candy);
+        copyMatrix(C, candy); 
         return SUCCESS;
       }
     } /* end of while() */
@@ -469,6 +466,7 @@ void printCandidates(const int *array, const int LEN,
 void printLinear(int array[ROWS][COLS])
 {
   int i, j;
+
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < COLS; j++)
@@ -476,6 +474,7 @@ void printLinear(int array[ROWS][COLS])
       printf("%d", array[i][j]);
     }
   }
+ 
   printf("\n");
 }
 
@@ -483,14 +482,16 @@ void determineCandidates(int board[ROWS][COLS], int cand[ROWS][COLS])
 {
   int i, j, val;
 
-  initializeCandidates(board);
+/*  initializeCandidates(board); */
 
   /* Go row-wise */
   for(i = 0; i < ROWS; i++)
   {
     for(j = 0; j < COLS; j++)
     {
-      if(board[i][j] != 0) continue;
+      if(board[i][j] != 0) continue; 
+
+      candidates[i][j] = SET_1_9;
 
       for(val = 1; val <= MAX_COUNT; val++)
       {
@@ -950,7 +951,24 @@ int getBitval(const int n)
    * returns an int with the nth bit turned on
    */
 
-  return (int) pow(2, (int)n);
+  switch(n)
+  {
+    case 0: return 1;
+    case 1: return 2;
+    case 2: return 4;
+    case 3: return 8;
+    case 4: return 16;
+    case 5: return 32;
+    case 6: return 64;
+    case 7: return 128;
+    case 8: return 256;
+    case 9: return 512;
+    default: printf("\n ERROR: getBitval(%d)", n);
+             assert(n >= 0 && n <= 9); 
+            return -1;
+  }
+
+/*  return (int) pow(2, (int)n); */
 }
 
 int checkbit(int n, const int b)  
