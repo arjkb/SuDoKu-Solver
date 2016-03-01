@@ -32,12 +32,13 @@
 
 #define SET_1_9 1022
 
+/* Functions for checking the input */
 int valid(const char *s);
 int illegal_char_error(const char *s);
 
+/* Functions for checking the integrity of the board */
 int validate_row(const int *row);
 int validate_columns(int board[ROWS][COLS]);
-
 int validate_boxes(int board[ROWS][COLS]);
 int validate_3x3(int board[ROWS][COLS], const int big_row, const int big_col);
 
@@ -45,27 +46,22 @@ int toDigit(char);
 
 int writeToBoard(int board[ROWS][COLS], const char *s);
 
-void print_board(int board[ROWS][COLS], const char *message);
-
+/* Functions that deal with the actual solving part */
 int solve(int board[ROWS][COLS]);
-int initial_sweep(int board[ROWS][COLS]);
+int initial_sweep_bitwise(int board[ROWS][COLS]);
 int exist_row(const int *row, const int element, const int current_index);
 int exist_col(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col);
 int exist_3x3(int board[ROWS][COLS], const int element, const int curr_row, const int curr_col);
 
-int initial_sweep_bitwise(int board[ROWS][COLS]);
-
+void initializeCandidates();
+void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]);
 void get_fillable_square(int board[ROWS][COLS], int candy[ROWS][COLS], int *r, int *c);
 int fill(int board[ROWS][COLS], int candidate[ROWS][COLS]);
-
-#ifdef OLD_FILL
-int fill(int board[ROWS][COLS], int candidate[ROWS][COLS], const int curr_row, const int curr_col);
-void getNextEmptySquare(int board[ROWS][COLS], const int curr_row, const int curr_col, int *next_row, int *next_col);
-#endif
 
 int count_empty_squares(int B[ROWS][COLS]);
 void getPossibleValues(const int candidates, int *values, int *size_of_values);
 
+/* Declarations for the bit-manipulation operations */
 void setbit(int *, const int);
 void clearbit(int *, const int);
 void clear_all_bits(int *bitpattern);
@@ -74,19 +70,14 @@ int getBitval(const int);
 int is_single_bit_on(const int n);
 int get_single_set_position(const int bitpattern);
 
-void initializeCandidates();
-void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]);
-
+/* Declarations for the functions printing 
+ * the board/candidates in various formats 
+ */
+void print_board(int board[ROWS][COLS], const char *message);
 void printCandidates(const int *array, const int LEN, const int r, const int c);
 void printLinear(int array[ROWS][COLS]);
 
-void get_ideal_candidate(int candy[ROWS][COLS], int *r, int *c);
 void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS]);
-
-/*
-int ifexist_col(const int board[ROWS][COLS], const int element);
-int ifexist_3x3(const int element, const int row_start, const int col_start);
-*/
 
 const int MAX_COUNT = 9;
 
@@ -125,8 +116,6 @@ int main()
       
       if( solvecount > 0 ) 
       {
-/*        print_board(board, "Partially Filled in Board: "); */
-
         printLinear(board); 
       }
       else
@@ -144,16 +133,15 @@ int main()
 
 int solve(int board[ROWS][COLS])
 {
-  int r_isb = -2;
+/*  int r_isb; */
   int r_fill = -2;
 
 #ifdef DEBUG
   printf("\n DEBUG: INSIDE solve()");
 #endif
 
-/*  getNextEmptySquare(board, 0, 0, &i, &j); */
-
-  r_isb = initial_sweep_bitwise(board);
+/*  r_isb = initial_sweep_bitwise(board);*/
+  initial_sweep_bitwise(board);
   r_fill = fill(board, candidates);
 
 #ifdef OLD_FILL
@@ -161,7 +149,7 @@ int solve(int board[ROWS][COLS])
 #endif
 
 #ifdef DEBUG
-  printf("\n r_isb: %d", r_isb);
+/*  printf("\n r_isb: %d", r_isb); */
   printf("\n r_fill: %d", r_fill);
 #endif
 
@@ -189,27 +177,17 @@ void initializeCandidates(int board[ROWS][COLS])
   printf("\n DEBUG: inside initializecandidates()");
 #endif
 
+  /* Manually unrolled loop to increase performance 
+   * (although not much performance increase was noticed) 
+   */
+
   for(i = 0; i < ROWS; i++)
   {
-    for(j = 0; j < COLS; j += 3)
+    for(j = 0; j < COLS; j++)
     {
       candidates[i][j] = SET_VALUE;
-      candidates[i][j+1] = SET_VALUE;
-      candidates[i][j+2] = SET_VALUE;
-/*      
-      if(board[i][j] == 0)
-      {
-        candidates[i][j] = SET_1_9;
-      }
-      else
-      {
-        candidates[i][j] = 0;
-        
-      }
-*/      
     }
   }
-
 }
 
 void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS])
@@ -257,7 +235,6 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
   int val[9] = {0};
   int size = 0;
   int k = 0;
-  int x;
 
   int fillable_row, fillable_col;
 
@@ -459,6 +436,7 @@ void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
   printf("\n POTENTIAL ERROR: Didn't find an empty square! (This is a point you aren't supposed to reach!)");
 }
 */
+
 void printCandidates(const int *array, const int LEN, 
                       const int r, const int c)
 {
@@ -607,81 +585,6 @@ int initial_sweep_bitwise(int board[ROWS][COLS])
   printf("\n Total Change: %d", tot_change);
 #endif
 
-  return tot_change;
-}
-
-int initial_sweep(int board[ROWS][COLS])
-{
-  /* Checks for any obvious squares */
-  
-  /* Possibility counts keep track of number of
-   * different possible values in a square
-   */
-  int possibility_count_r = 0;
-  int possibility_count_c = 0;
-
-  int val, candidate_r, candidate_c;
-  int changed;
-  int tot_change = 0;
-
-  int i, j;
-
-  do  
-  {
-    changed = 0;
-
-    for(i = 0; i < ROWS; i++)  
-    {
-      for(j = 0; j < COLS; j++)
-      {
-        if(board[i][j] == 0)
-        {
-          /* Attempt filling only if the board is empty */
-        
-          possibility_count_r = 0;
-          possibility_count_c = 0;
-
-          for(val = 1; val <= MAX_COUNT; val++)
-          {
-
-            /*  Tries to see if a val is possible in a square (i, j)
-             *  (by checking if the value exists anywhere else in that same row, col).
-             *
-             *  If the val is the only possible candidate for a square, 
-             *  it is assigned to that square.
-             */
-            if(!exist_row(board[i], val, j))
-            {
-              candidate_r = val;
-              possibility_count_r++;
-            }
-
-            if(!exist_col(board, val, i, j))
-            {
-              candidate_c = val;
-              possibility_count_c++;
-            }
-          } 
-
-          if(possibility_count_r == 1)
-          {
-            printf(" R FILLING IN %d at (%d, %d)", candidate_r, i, j);
-            board[i][j] = candidate_r;
-            changed++;
-            tot_change++;
-          }
-
-          if(possibility_count_c == 1)
-          {
-            printf(" C FILLING IN %d at (%d, %d)", candidate_c, i, j);
-            board[i][j] = candidate_c;
-            changed++;
-            tot_change++;
-          } 
-        }
-      } 
-    }
-  } while( changed );
   return tot_change;
 }
 
@@ -883,25 +786,12 @@ int validate_3x3(int board[ROWS][COLS], const int big_row, const int big_col)
 {
   int m, n;
   int i, j;
-  int row_start = 0, col_start = 0;
+
+  /* Yup this works; think about it! */
+  int row_start = big_row * 3;
+  int col_start = big_col * 3;
 
   int temp;
-
-  switch(big_row)
-  {
-    case 0: row_start = 0; break;
-    case 1: row_start = 3; break;
-    case 2: row_start = 6; break;
-    default: return INVALID;
-  }
-
-  switch(big_col)
-  {
-    case 0: col_start = 0; break;
-    case 1: col_start = 3; break;
-    case 2: col_start = 6; break;
-    default: return INVALID;
-  }
 
   for(m = row_start; m < (row_start + 3); m++)
   {
@@ -968,25 +858,6 @@ int getBitval(const int n)
     printf("\n Error: getBitval(%d) invalid argument", n);
     return -1;
   }
-/*
-  switch(n)
-  {
-    case 0: return 1;
-    case 1: return 2;
-    case 2: return 4;
-    case 3: return 8;
-    case 4: return 16;
-    case 5: return 32;
-    case 6: return 64;
-    case 7: return 128;
-    case 8: return 256;
-    case 9: return 512;
-    default: printf("\n ERROR: getBitval(%d)", n);
-             assert(n >= 0 && n <= 9); 
-            return -1;
-  }
-*/
-/*  return (int) pow(2, (int)n); */
 }
 
 int checkbit(int n, const int b)  
@@ -1051,6 +922,6 @@ int get_single_set_position(const int bitpattern)
     
     default: printf("\n ERROR: get_single_set_position(%d)", bitpattern);
              assert(bitpattern >= 1 && bitpattern <= 512); 
-            return -1;
+             return -1;
    }
 }
