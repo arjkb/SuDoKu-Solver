@@ -11,6 +11,7 @@
 #include<ctype.h>
 #include<math.h>
 #include<assert.h>
+#include<limits.h>
 
 #define DEBUGQ
 
@@ -54,7 +55,7 @@ int exist_3x3(int board[ROWS][COLS], const int element, const int curr_row, cons
 
 int initial_sweep_bitwise(int board[ROWS][COLS]);
 
-void get_fillable_square(int board[ROWS][COLS], int *r, int *c);
+void get_fillable_square(int board[ROWS][COLS], int candy[ROWS][COLS], int *r, int *c);
 int fill(int board[ROWS][COLS], int candidate[ROWS][COLS]);
 
 #ifdef OLD_FILL
@@ -79,6 +80,7 @@ void determineCandidates(int board[ROWS][COLS], int candidates[ROWS][COLS]);
 void printCandidates(const int *array, const int LEN, const int r, const int c);
 void printLinear(int array[ROWS][COLS]);
 
+void get_ideal_candidate(int candy[ROWS][COLS], int *r, int *c);
 void copyMatrix(int source[ROWS][COLS], int dest[ROWS][COLS]);
 
 /*
@@ -285,7 +287,7 @@ int fill(int board[ROWS][COLS], int candy[ROWS][COLS])
     size = 0;
     k = 0;
 
-    get_fillable_square(B, &fillable_row, &fillable_col);
+    get_fillable_square(B, C, &fillable_row, &fillable_col);
 
 #ifdef  DEBUG
     assert(fillable_row >= 0 && fillable_row <= 9);
@@ -394,12 +396,12 @@ void getPossibleValues(int candidates, int values[9],  int *size)
 #endif
 }
 
-void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
+void get_fillable_square(int board[ROWS][COLS], int candy[ROWS][COLS], int *r, int *c)
 {
-  int i, j;
+  int i, j, k;
 
-  *r = -1;
-  *c = -1;
+  int lowest_count = INT_MAX;
+  int count = 0;
 
   for(i = 0; i < ROWS; i++)
   {
@@ -407,15 +409,32 @@ void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
     {
       if(board[i][j] == 0)
       {
-        *r = i;
-        *c = j;
-        return;
+        count = 0;
+        for(k = 0; k < MAX_COUNT; k++)
+        {
+          if(checkbit(candy[i][j], k))
+          {
+            count++;
+          }
+        }
+
+        if(count < lowest_count)
+        {
+          lowest_count = count;
+          *r = i;
+          *c = j;
+        }
       }
+
     }
   }
-  
+
+  return;
+
   printf("\n POTENTIAL ERROR: Didn't find an empty square! (This is a point you aren't supposed to reach!)");
 }
+
+
 /*
 void get_fillable_square(int board[ROWS][COLS], int *r, int *c)
 {
